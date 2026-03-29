@@ -1,22 +1,45 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"referral-app/internal/config"
 	"referral-app/internal/handler"
 	"referral-app/internal/middleware"
+	"referral-app/internal/observability"
 	"referral-app/internal/queue"
 	"referral-app/internal/service"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )
 
 func main() {
 	cfg := config.Load()
 
 	app := fiber.New()
+
+	if cfg.ObservabilityEnabled {
+		observability.InitMetrics()
+
+		shutdownTracing, err := observability.InitTracing(
+			context.Background(),
+			cfg.ServiceName,
+			cfg.Environment,
+			cfg.OTLPTraceEndpoint,
+			cfg.OTLPInsecure,
+		)
+		if err != nil {
+			panic(err)
+		}
+		defer func() {
+			_ = shutdownTracing(context.Background())
+		}()
+
+		app.Get("/metrics", adaptor.HTTPHandler(observability.PrometheusHTTPHandler()))
+	}
 
 	// Middleware
 	app.Use(middleware.RequestMiddleware(

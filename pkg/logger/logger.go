@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ctxKey string
@@ -17,9 +19,22 @@ func getReqID(ctx context.Context) string {
 		return "unknown"
 	}
 	if v := ctx.Value(RequestIDKey); v != nil {
-		return v.(string)
+		if reqID, ok := v.(string); ok && reqID != "" {
+			return reqID
+		}
 	}
 	return "unknown"
+}
+
+func getTraceID(ctx context.Context) string {
+	if ctx == nil {
+		return "unknown"
+	}
+	spanCtx := trace.SpanContextFromContext(ctx)
+	if !spanCtx.IsValid() {
+		return "unknown"
+	}
+	return spanCtx.TraceID().String()
 }
 
 func log(color string, level string, ctx context.Context, msg string, kv map[string]interface{}) {
@@ -29,6 +44,7 @@ func log(color string, level string, ctx context.Context, msg string, kv map[str
 		fmt.Sprintf("time=%s", time.Now().Format(time.RFC3339)),
 		fmt.Sprintf("level=%s", level),
 		fmt.Sprintf("req_id=%s", reqID),
+		fmt.Sprintf("trace_id=%s", getTraceID(ctx)),
 		fmt.Sprintf("msg=%q", msg),
 	}
 

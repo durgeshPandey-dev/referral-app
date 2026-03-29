@@ -24,7 +24,7 @@ func InitTracing(
 		ctx,
 		resource.WithAttributes(
 			semconv.ServiceName(serviceName),
-			semconv.DeploymentEnvironmentName(environment),
+			semconv.DeploymentEnvironment(environment),
 		),
 	)
 	if err != nil {

@@ -42,6 +42,10 @@ func RequestMiddleware(timeout time.Duration) fiber.Handler {
 	tracer := otel.Tracer("beckn-onix/http")
 
 	return func(c *fiber.Ctx) error {
+		// Fiber reuses request buffers; clone strings used after c.Next().
+		method := strings.Clone(c.Method())
+		requestPath := strings.Clone(c.Path())
+
 		reqID := c.Get("X-Request-Id")
 		if reqID == "" {
 			reqID = uuid.NewString()
@@ -59,12 +63,12 @@ func RequestMiddleware(timeout time.Duration) fiber.Handler {
 		c.Locals("ctx", ctx)
 
 		start := time.Now()
-		routeLabel := observability.NormalizeRouteLabel(c.Path())
+		routeLabel := observability.NormalizeRouteLabel(requestPath)
 		observability.IncInflightHTTPRequests()
 
 		ctx, span := tracer.Start(ctx, "http.request")
 		span.SetAttributes(
-			attribute.String("http.method", c.Method()),
+			attribute.String("http.method", method),
 			attribute.String("http.route", routeLabel),
 			attribute.String("request.id", reqID),
 		)
@@ -74,7 +78,7 @@ func RequestMiddleware(timeout time.Duration) fiber.Handler {
 			duration := time.Since(start)
 			status := c.Response().StatusCode()
 			observability.DecInflightHTTPRequests()
-			observability.ObserveHTTPRequest(c.Method(), routeLabel, status, duration)
+			observability.ObserveHTTPRequest(method, routeLabel, status, duration)
 
 			span.SetAttributes(
 				attribute.Int("http.status_code", status),
@@ -95,8 +99,8 @@ func RequestMiddleware(timeout time.Duration) fiber.Handler {
 		}
 
 		logger.Info(ctx, "request_complete", map[string]interface{}{
-			"path":     c.Path(),
-			"method":   c.Method(),
+			"path":     requestPath,
+			"method":   method,
 			"duration": time.Since(start).Milliseconds(),
 			"status":   c.Response().StatusCode(),
 		})

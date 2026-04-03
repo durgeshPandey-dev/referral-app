@@ -1,0 +1,36 @@
+{
+  "name": "api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/api",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "cmd/main.go"
+      },
+      "cache": true,
+      "inputs": ["golang"],
+      "outputs": ["{workspaceRoot}/dist/api"]
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "main": "cmd/main.go"
+      },
+      "inputs": ["golang"],
+      "continuous": true
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test",
+      "cache": true,
+      "inputs": ["golang"]
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint",
+      "cache": true,
+      "inputs": ["golang"]
+    }
+  }
+}

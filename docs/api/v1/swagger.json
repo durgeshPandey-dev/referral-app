@@ -1,0 +1,65 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the backend API for the Referral Email Automation System.",
+        "title": "Swagger: Referral Backend API",
+        "contact": {
+            "name": "Durgesh Pandey",
+            "url": "https://github.com/durgeshPandey-dev/referral-app"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "paths": {
+        "/v1/upload": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Upload an Excel containing contact details",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Excel (.xlsx) file with contact details",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

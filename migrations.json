@@ -1,0 +1,18 @@
+{
+  "migrations": [
+    {
+      "version": "4.0.0-beta.0",
+      "description": "Update main paths in build and serve targets to be relative to project root",
+      "implementation": "./src/migrations/update-4.0.0/update-main-path-in-targets",
+      "package": "@nx-go/nx-go",
+      "name": "update-main-path-in-targets"
+    },
+    {
+      "version": "4.0.0-beta.0",
+      "description": "Configure target-level caching and named inputs for Go projects",
+      "implementation": "./src/migrations/update-4.0.0/configure-target-caching-and-named-inputs",
+      "package": "@nx-go/nx-go",
+      "name": "configure-target-caching-and-named-inputs"
+    }
+  ]
+}
